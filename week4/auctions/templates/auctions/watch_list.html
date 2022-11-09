@@ -1,0 +1,10 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <ul>
+        {% for listing in all_listing_items %}
+            <li><a href="{% url 'Listing_information' listing.id %}">{{listing.list_watch}}</a></li> 
+        {% endfor %}
+    </ul>
+    <a href="{% url 'index' %}">Back to the all listing page</a>
+{% endblock %}

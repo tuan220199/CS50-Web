@@ -1,0 +1,7 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2> ERROR!!!</h2>
+    <h4> This listing item is already in your watch list</h4>
+    <p> You can return to this listing item page <a href="{% url 'Listing_information' listing_item_id %}">here</a></p>
+{% endblock %}

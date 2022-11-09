@@ -1,0 +1,121 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing: {{listing_item.title}}</h2>
+
+    <div class="card" style="width: 100%;">
+        <img src="{{listing_item.image}}" class="card-img-top" height="800px">
+        
+        <div class="card-body">
+          <p class="card-text">{{listing_item.description}}</p>
+          <h3 class="card-title">$ {{listing_item.initial_price}}</h3>
+          
+          <h3 class="card-title">Bids</h3>
+          {% if active_status %}
+            <p>Active</p>
+            <form action="{% url 'watch_list' %}" method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <input type="hidden" class="form-control" name="listing_item_id" value="{{listing_item.id}}">
+              </div>
+              <button type="submit" class="btn btn-danger">Add to watch list</button>
+            </form>
+          {% else%}
+            <p>Not active</p>
+          {% endif %}
+            <p>{{active_status}}</p>
+          <p class="card-text text-muted">{{number_of_bids}} bids so far. Your bid is the current bid.</p>
+          <div>
+            <ul>
+              {% for bid in bids %}
+                  <li> {{bid}}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div>
+            {% if user.is_authenticated %}
+              {% if active_status %}
+                {% if current_user == listing_item.owner %}
+                
+                  <form action="{% url 'closeBid' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                      <input type="hidden" class="form-control" name="listing_item_id" value="{{listing_item.id}}">
+                    </div>
+                    <button type="submit" class="btn btn-danger">Close the Bid</button>
+                  </form> 
+                  <p>You can not bid in your own listing</p>
+                  
+                {% else %}
+                <form action="{% url 'bid' %}" method="post">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <input type="number" class="form-control" name="bid" placeholder="Bid">
+                    <input type="hidden" class="form-control" name="listing_item_id" value="{{listing_item.id}}">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Bids</button>
+                  </form>
+                {% endif %}
+
+              {% else %}
+              
+                <p>The bids is closed now </p>
+                {% if current_user == winner %}
+                  <p>You are the winner</p>
+                {% else %}
+                  <p>The winner is {{winner}}</p>
+                {% endif %}
+              {% endif %}
+              
+            {% else %}
+                <p>you need to <a href="{% url 'login' %}">log in</a>to bid</p>
+            {% endif %}
+          </div>
+          
+          <h3 class="card-title">Details</h3>
+          
+          <ul>
+            <li>Listed by: {{listing_item.owner}}</li>
+            {% if listing_item.category %}
+            <li>Category: {{listing_item.category}}</li>
+            {% else %}
+            <li>Category: No Category Listed</li>
+            {% endif%}
+          </ul>
+
+          <h3 class="card-title">Comments</h3>
+          <div>
+            <ul>
+              {% for comment in comments%}
+                <li>{{comment}}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          
+          <div>
+            {% if user.is_authenticated %}
+  
+              {% if current_user == listing_item.owner %}
+                <p>You can not comment in your own listing</p>
+              {% else %}
+                <form action="{% url 'comment' %}" method="post">
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <input type="text" class="form-control" name="comment" placeholder="Comment">
+                    <input type="hidden" class="form-control" name="listing_item_id" value="{{listing_item.id}}">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Comment</button>
+                </form>
+              {% endif %}
+  
+            {% else %}
+                <p>you need to <a href="{% url 'login' %}">log in</a>to comment</p>
+            
+            {% endif %}
+          </div>
+        </div>
+                 
+    </div>
+        
+{% endblock %}

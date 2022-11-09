@@ -1,0 +1,7 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2> ERROR!!!</h2>
+    <h4> Your bid must be not smaller than initial price and the lastest bid</h4>
+    <p> You can bid again <a href="{% url 'Listing_information' listing_item_id %}">here</a></p>
+{% endblock %}
