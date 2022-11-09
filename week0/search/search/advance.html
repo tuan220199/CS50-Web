@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Search</title>
+        <meta name="viewport" content="width=device_width initial-scale=1.0">
+        <link rel="stylesheet" href="styles.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    </head>
+    <body>
+          <div class="navbar navbar-expand-lg justify-content-end">
+            <div class="nav-item ">
+              <a class="nav-link active"  href="index.html">Home</a>
+            </div>
+            <div class="nav-item ">
+              <a class="nav-link" href="image.html">Image Search</a>
+            </div>
+          </div>
+
+        <form action="https://www.google.com/search" >
+            <div class="form_advance_search">  
+              <div class="mb-3 row">
+                <div class="col-sm-2 col-form-label">
+                  <label for="allWords">all these words:</label>
+                </div>
+                <div class="col-sm-6">
+                  <input autofocus="autofocus" class="form-control" name="as_q" type="text" id="allWords">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <div class="col-sm-2 col-form-label">
+                  <label for="extractWord">this extraxt word or phase:</label>
+                </div>
+                <div class="col-sm-6">
+                  <input autofocus="autofocus" class="form-control" name="as_epq" type="text" id="extractWord">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <div class="col-sm-2 col-form-label">
+                  <label for="anyWords">any of these words:</label>
+                </div>
+                <div class="col-sm-6">
+                  <input autofocus="autofocus" class="form-control" name="as_oq" type="text" id="anyWords">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <div class="col-sm-2 col-form-label">
+                  <label for="noneWords">none of these words:</label>
+                </div>
+                <div class="col-sm-6">
+                  <input autofocus="autofocus" class="form-control" name="as_eq" type="text" id="noneWords">
+                </div>
+              </div>
+            
+              <div class="advance_search_submit_class">
+                <input type="submit" id="advance_search_submit" value="Advance search">
+              </div>
+            </div>
+        </form>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

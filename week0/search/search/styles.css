@@ -1,0 +1,90 @@
+.navbar
+{
+    margin-top: 15px;
+    margin-right: 20px;
+}
+.nav-item
+{
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 14px;
+    font-family: arial, sans-serif;
+}
+#google_pic
+{
+    align-items: center;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 40px; 
+    margin-bottom: 20px;
+}
+
+input
+{
+    margin-top: 20px;
+    margin-bottom :20px;
+}
+
+#bar_search
+{
+    width:550px;
+    height:fit-content;
+    border-radius: 24px;
+    border:solid 1px;
+    height:44px;
+    border-color: #dfe1e5;
+}
+.submit_search
+{
+    margin-top: 30px;
+    font-size: 14px;
+    font-family: arial, sans-serif;
+    
+}
+
+#google_seach_submit, #lucky_serach_submit
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    height:40px;
+    width:130px;
+    background-color: #f4f1ff;
+    border-color: #f4f1ff;
+}
+#google_search_submit:hover, #lucky_search_submit:hover
+{
+    border-style: solid;
+    border-width: 1px;
+}
+
+
+.form_advance_search
+{
+    width: 100%;
+    clear: both;
+    font-size:16px;
+    padding-top:20px;
+    margin-top: 40px;
+    margin-left: 30px
+}
+
+#advance_search_submit
+{
+    margin-left: 880px; 
+    border-radius: 2px;
+    cursor: default;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #4d90fe;    
+}
+

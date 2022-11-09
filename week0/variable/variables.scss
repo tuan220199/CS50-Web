@@ -1,0 +1,12 @@
+$variable: red;
+ul
+{
+    color: $variable;
+    font-size: 14px;
+}
+
+ol
+{
+    color: $variable;
+    font-size: 16px;
+}
