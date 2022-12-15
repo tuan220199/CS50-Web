@@ -35,16 +35,16 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
   //get a request to email/mailbox to request email with FETCH 
-  fetch('/emails/inbox')
+  fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
     // Print emails
-    //console.log(emails);
+    console.log(emails);
 
     // Extract the items of email objects in an array of emails
     emails.forEach(function(email){       
        
-      // Extract each key-value pair in email object
+      // Extract each key-value pair from email object, storage in variable
       const sender = email["sender"];
       const recipients = email["recipients"];
       const subject = email["subject"];
@@ -53,11 +53,49 @@ function load_mailbox(mailbox) {
       const read = email["read"];
       const archived = email["archived"]; 
 
-      // Create the new div element
-      const element = document.createElement('div');
-      element.innerHTML = `${sender}   ${body}`;
+      // Create the new div element for each email element
+      var element = document.createElement('div');
+      //element.className = "card";
+      // Check if the meail read or not 
+      if (read === true)
+      {
+        element.className = 'card bg-light'; 
+      }
+      else
+      {
+        element.className = 'card bg-white';
+      }
+      
+      // Create card body element 
+      var card_body_element = document.createElement('div');
+      card_body_element.className = "card-body";
+
+      // Create card text element
+      var card_text_element = document.createElement('div');
+      card_text_element.className = "card-text";
+      card_text_element.innerHTML= `
+      <table class="table table-borderless">
+        <tbody>
+        <tr>
+          <td style="width:15%; text-align: left"><strong>${sender}</strong></td>
+          <td style="width:15%; text-align: left">${subject}</td>
+          <td style="width:70%; text-align: right"><small class="text-muted">${timestamp}</small></td>
+        </tr>
+        </tbody>
+      </table>
+      `;
+      
+      // Append child (HTML element) into card body element
+      card_body_element.appendChild(card_text_element);
+
+      // Append child (HTML element) into card text element
+      element.appendChild(card_body_element);
+
+      
+
+      // Append the whole element for each email in the email view 
       document.querySelector('#emails-view').append(element);
-    }); 
+    });
   });
 }
 
