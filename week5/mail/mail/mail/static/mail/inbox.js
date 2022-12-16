@@ -15,9 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function compose_email() {
 
-  // Show compose view and hide other views
+  // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#email-detail').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -26,10 +27,11 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
-  
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-detail').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -39,12 +41,13 @@ function load_mailbox(mailbox) {
   .then(response => response.json())
   .then(emails => {
     // Print emails
-    console.log(emails);
+    //console.log(emails);
 
     // Extract the items of email objects in an array of emails
     emails.forEach(function(email){       
        
       // Extract each key-value pair from email object, storage in variable
+      const email_id = email["id"];
       const sender = email["sender"];
       const recipients = email["recipients"];
       const subject = email["subject"];
@@ -54,24 +57,24 @@ function load_mailbox(mailbox) {
       const archived = email["archived"]; 
 
       // Create the new div element for each email element
-      var element = document.createElement('div');
-      //element.className = "card";
+      const element = document.createElement('div');
+      element.className = "card";
       // Check if the meail read or not 
       if (read === true)
       {
-        element.className = 'card bg-light'; 
+        element.classList.add('bg-secondary'); 
       }
       else
       {
-        element.className = 'card bg-white';
+        element.classList.add('bg-white');
       }
       
       // Create card body element 
-      var card_body_element = document.createElement('div');
+      const card_body_element = document.createElement('div');
       card_body_element.className = "card-body";
 
       // Create card text element
-      var card_text_element = document.createElement('div');
+      const card_text_element = document.createElement('div');
       card_text_element.className = "card-text";
       card_text_element.innerHTML= `
       <table class="table table-borderless">
@@ -91,11 +94,13 @@ function load_mailbox(mailbox) {
       // Append child (HTML element) into card text element
       element.appendChild(card_body_element);
 
-      
+      // Click email and go to view_email function
+      element.addEventListener('click', () => view_email(email_id)); 
 
-      // Append the whole element for each email in the email view 
+     // Append the whole element for each email in the email view 
       document.querySelector('#emails-view').append(element);
-    });
+      
+    });   
   });
 }
 
@@ -128,4 +133,99 @@ function send_email(event)
       load_mailbox('sent');
   });
 
+}
+
+function view_email(email_id)
+{
+
+  // Check all the email in this user in term of email ID matching email_id
+
+  // Mark the email is already read
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  })
+
+  // Show the email in detail
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+      // Extract the varible from email
+      const sender = email["sender"];
+      const recipients = email["recipients"];
+      const subject = email["subject"];
+      const timestamp = email["timestamp"];
+      const body = email["body"];
+       
+      // Show the mailbox and hide other views
+      document.querySelector('#emails-view').style.display = 'none';
+      document.querySelector('#compose-view').style.display = 'none';
+      document.querySelector('#email-detail').style.display = 'block';
+
+      // Show the mailbox in detail
+      
+      // heaidng email
+      const heading_element = document.createElement("div");
+      
+      heading_element.innerHTML = `
+      <br>
+      <p><strong>From:</strong> ${sender}</p>
+      <p><strong>To:</strong> ${recipients}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Timestamp:</strong> ${timestamp}</p>
+      `;
+      heading_element.className = "card";
+      // Clear the previous detail email
+      document.querySelector('#email-detail').innerHTML = "";
+
+      // Add the element to the email detail
+      document.querySelector('#email-detail').append(heading_element);
+
+      // body email
+      const body_element = document.createElement("div");
+      body_element.innerHTML = `
+      <br>
+      ${body}
+      <br>
+      `;
+      body_element.className = "card";
+
+      // Add the element to the email view
+
+      document.querySelector('#email-detail').append(body_element);
+
+      // Reply button 
+      const button_element = document.createElement("button");
+      button_element.className = "btn btn-primary";
+      button_element.innerHTML = "Reply";
+
+      // Click button event on reply
+      button_element.addEventListener('click', function(){
+        console.log("Reply");
+      }); 
+
+      document.querySelector('#email-detail').append(button_element);
+
+      // Archive button
+      const archive_button = document.createElement("button");
+      archive_button.className = "btn btn-danger";
+      archive_button.innerHTML = "Archive";
+
+      // Click button event on reply
+      archive_button.addEventListener('click', function(){
+        fetch(`/emails/${email_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: true
+          })
+        })
+        
+        load_mailbox('inbox');
+      }); 
+
+      document.querySelector('#email-detail').append(archive_button);
+
+  });
 }

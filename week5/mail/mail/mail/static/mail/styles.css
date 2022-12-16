@@ -2,12 +2,8 @@ textarea {
     min-height: 400px;
 }
 
-.read_email 
-{
-    background-color: red;
+#button_reply{
+    background-color: blue;
+    
 }
 
-.unread_email
-{
-    background-color: blue;
-}
