@@ -91,15 +91,59 @@ function load_mailbox(mailbox) {
       // Append child (HTML element) into card body element
       card_body_element.appendChild(card_text_element);
 
-      // Append child (HTML element) into card text element
-      element.appendChild(card_body_element);
+      // Check the which kind of mailbox: Inbox (add archive button); Archive (add unarchive button); Sent (nothing)
+      if (mailbox === "inbox")
+      {
+        // Archive button 
+        const archive_button_element = document.createElement("button");
+        archive_button_element.className = "btn btn-danger";
+        archive_button_element.innerHTML = "Archive";
 
+        // Click button event on archive
+        archive_button_element.addEventListener('click', function(){
+          fetch(`emails/${email_id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+              archived: true
+            })
+          })
+          .then(() => {
+            load_mailbox("archive");
+          }) 
+        }); 
+
+        card_body_element.appendChild(archive_button_element);
+      }
+      else if (mailbox === "archive")
+      {
+        // Unarchived button 
+        const unarchive_button_element = document.createElement("button");
+        unarchive_button_element.className = "btn btn-danger";
+        unarchive_button_element.innerHTML = "Unarchive";
+
+        // Click button event on unarchive
+        unarchive_button_element.addEventListener('click', function(){
+          fetch(`emails/${email_id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+              archived: false
+            })
+          })
+          .then(() => {
+            load_mailbox("inbox")
+          })
+        });
+        card_body_element.appendChild(unarchive_button_element);
+      }
+    
+      // Append child (HTML element= card body element) into card element
+      element.appendChild(card_body_element);
+      
       // Click email and go to view_email function
-      element.addEventListener('click', () => view_email(email_id)); 
+      card_text_element.addEventListener('click', () => view_email(email_id)); 
 
      // Append the whole element for each email in the email view 
       document.querySelector('#emails-view').append(element);
-      
     });   
   });
 }
@@ -193,7 +237,6 @@ function view_email(email_id)
       body_element.className = "card";
 
       // Add the element to the email view
-
       document.querySelector('#email-detail').append(body_element);
 
       // Reply button 
@@ -203,29 +246,52 @@ function view_email(email_id)
 
       // Click button event on reply
       button_element.addEventListener('click', function(){
-        console.log("Reply");
+        email_reply(email_id);
       }); 
 
       document.querySelector('#email-detail').append(button_element);
 
-      // Archive button
-      const archive_button = document.createElement("button");
-      archive_button.className = "btn btn-danger";
-      archive_button.innerHTML = "Archive";
+      // Archive button 
+      const archive_button_element = document.createElement("button");
+      archive_button_element.className = "btn btn-danger";
+      archive_button_element.innerHTML = "Archive";
 
-      // Click button event on reply
-      archive_button.addEventListener('click', function(){
+      // Click button event on archive
+      archive_button_element.addEventListener('click', function(){
         fetch(`/emails/${email_id}`, {
           method: 'PUT',
           body: JSON.stringify({
               archived: true
           })
         })
-        
-        load_mailbox('inbox');
       }); 
 
-      document.querySelector('#email-detail').append(archive_button);
-
+      document.querySelector('#email-detail').append(archive_button_element);
   });
+}
+
+function email_reply(email_id)
+{
+  // Show the mailbox and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#email-detail').style.display = 'none';
+
+  // Show the email in detail
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+      // Extract the varible from email
+      const sender = email["sender"];
+      const recipients = email["recipients"];
+      const subject = email["subject"];
+      const timestamp = email["timestamp"];
+      const body = email["body"];
+
+
+      // Clear out composition fields
+      document.querySelector('#compose-recipients').value = sender;
+      document.querySelector('#compose-subject').value = `Re: ${body}`;
+      document.querySelector('#compose-body').value = `${timestamp} ${sender} wrote: ${body}`;
+  })
 }
