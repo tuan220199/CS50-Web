@@ -264,6 +264,7 @@ function view_email(email_id)
               archived: true
           })
         })
+        .then(() => {load_mailbox("archive")})
       }); 
 
       document.querySelector('#email-detail').append(archive_button_element);
