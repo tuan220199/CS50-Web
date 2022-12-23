@@ -17,27 +17,27 @@
             }
 
             h1 {
-                position: relative;
                 animation-name: move;
-                animation-duration: 3s;
-                animation-fill-mode: forwards;
+                position: relative;
+                animation-duration: 4s;
                 animation-iteration-count: infinite;
+                animation-play-state: paused;
+                animation-fill-mode: forwards;
             }
-
+           
         </style>
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const h1 = document.querySelector('h1');
-
-                // Stop animation initially
-                h1.style.animationPlayState  = 'paused';
-
-                // Toggle animation on click
-                document.querySelector('button').onclick = () => {
-                    if (h1.style.animationPlayState  === 'paused')
-                        h1.style.animationPlayState = 'running';
+            document.addEventListener("DOMContentLoaded", function(){
+                document.querySelector("button").onclick = function() {
+                    const h1 = document.querySelector("h1");
+                    if (h1.style.animationPlayState == "running")
+                    {
+                        h1.style.animationPlayState = "paused";
+                    }
                     else
-                        h1.style.animationPlayState  = 'paused';
+                    {
+                        h1.style.animationPlayState = "running";
+                    }
                 };
             });
         </script>
