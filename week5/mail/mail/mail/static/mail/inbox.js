@@ -132,7 +132,7 @@ function load_mailbox(mailbox) {
             })
           })
           .then(() =>{
-            console.log("Click");
+            load_mailbox("inbox");
           })
         });
       }
@@ -146,6 +146,24 @@ function load_mailbox(mailbox) {
       document.querySelector('#emails-view').append(element);
     });   
   });
+
+  // when scroll the page, in the end of page set alert and change the background color
+  window.onscroll = () => {
+
+    if ((window.innerHeight + window.scrollY >= document.body.offsetHeight) && (localStorage.getItem('alerted') === "false")) 
+    {   
+          document.querySelector('body').style.background = 'green';
+          alert("You have reached all the emails!");
+          localStorage.setItem('alerted', "true");  
+    } 
+    else 
+    {
+        document.querySelector('body').style.background = 'white';
+        localStorage.setItem('alerted', "false");
+    }
+
+};
+
 }
 
 function send_email(event)
