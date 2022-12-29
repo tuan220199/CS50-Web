@@ -94,12 +94,13 @@ function load_mailbox(mailbox) {
       // Check the which kind of mailbox: Inbox (add archive button); Archive (add unarchive button); Sent (nothing)
       if (mailbox === "inbox")
       {
-        // Archive button 
+        // Archive button created and append as child in card body element
         const archive_button_element = document.createElement("button");
         archive_button_element.className = "btn btn-danger";
         archive_button_element.innerHTML = "Archive";
-
-        // Click button event on archive
+        card_body_element.appendChild(archive_button_element);
+        
+        // Click button event on archive: move to archive route and perform animation hide
         archive_button_element.addEventListener('click', function(){
           fetch(`emails/${email_id}`, {
             method: "PUT",
@@ -107,21 +108,22 @@ function load_mailbox(mailbox) {
               archived: true
             })
           })
-          .then(() => {
-            load_mailbox("archive");
-          }) 
+          element.style.animationPlayState = 'running';
+          element.addEventListener('animationend', () =>  {
+            element.remove();
+            });
         }); 
-
-        card_body_element.appendChild(archive_button_element);
+        
       }
       else if (mailbox === "archive")
       {
-        // Unarchived button 
+        // Unarchived button created and append as child in card body element 
         const unarchive_button_element = document.createElement("button");
         unarchive_button_element.className = "btn btn-danger";
         unarchive_button_element.innerHTML = "Unarchive";
-
-        // Click button event on unarchive
+        card_body_element.appendChild(unarchive_button_element);
+        
+        // Click button event on archive: move to archive route and perform animation hide
         unarchive_button_element.addEventListener('click', function(){
           fetch(`emails/${email_id}`, {
             method: "PUT",
@@ -129,13 +131,11 @@ function load_mailbox(mailbox) {
               archived: false
             })
           })
-          .then(() => {
-            load_mailbox("inbox")
+          .then(() =>{
+            console.log("Click");
           })
         });
-        card_body_element.appendChild(unarchive_button_element);
       }
-    
       // Append child (HTML element= card body element) into card element
       element.appendChild(card_body_element);
       
