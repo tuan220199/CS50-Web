@@ -1,9 +1,16 @@
 {% extends "network/layout.html" %}
-
+{% load static %}
 {% block body %}
-<<<<<<< HEAD
-    TODO the thing
-=======
-    TODO the thing
->>>>>>> 9a84a06614728d5491935ef5fa7f08fd2e393423
+    <div id="new_post_form">
+        <form action="" id="post_form">
+            <div>
+                <label for="new_post"><strong>{{request.user.username}}</strong></label>
+                <textarea class="form-control" placeholder="What do you think?" id="post_content" rows="5"></textarea>
+            </div>
+            <input type="submit" id="post_button" value="Post" class="btn btn-primary">
+        </form>
+    </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'network/index.js' %}"></script>
 {% endblock %}
