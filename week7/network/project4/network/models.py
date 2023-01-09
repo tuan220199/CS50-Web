@@ -21,7 +21,7 @@ class Post(models.Model):
         } 
 
     def __str__(self):
-        return f"{self.owner} posts {self.content} at {timestamp}"
+        return f"{self.owner} posts {self.content} at {self.timestamp.strftime('%b %d %Y, %I:%M %p')}"
 
 class Comment(models.Model):
     comment = models.CharField(max_length=3000, null=True)
@@ -49,4 +49,7 @@ class Follower(models.Model):
             "follower": [user.username for user in self.followers.all()],
             "being_followered": self.being_followered.username,
         }
+
+    def __str__(self):
+        return f"{self.being_followered} has {self.followers.count()} followers"
     

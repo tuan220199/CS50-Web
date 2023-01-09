@@ -11,20 +11,50 @@ from .models import User, Post, Comment, Follower
 
 
 def index(request):
+    return render(request, "network/index.html")
 
-    # Authenticated users view their inbox 
-    if request.user.is_authenticated:
-        return render(request, "network/index.html")
+
+def posting(request):
     
-    # Evryone else is promped to sign in 
-    else:
-        return HttpResponseRedirect(reverse("login"))
+    # Check the method is POST 
+    if request.method == "POST":
 
-@csrf_exempt
-@login_required
-def post(request):
-    pass
+        # Retrieve post's content from the html form 
+        post_content = request.POST["post_content"]
 
+        # Owner is the present user
+        owner = request.user
+
+        # Create the new object POST (model)
+        new_post = Post(
+            owner = owner,
+            content = post_content
+        )
+
+        new_post.save()
+
+        return HttpResponseRedirect(reverse("index"))
+
+def all_post(request):
+
+    # Return all the posts of all users in reverse order in JSON form 
+    posts = Post.objects.all().order_by("-timestamp")
+    return JsonResponse([post.serialize_post() for post in posts], safe=False)
+
+def profile(request):
+    owner = request.user
+    followers = Follower.objects.get(being_followered=owner)
+    #being_followered = Follower.objects.filter(owner in followers)
+    number_of_followers = followers.followers.count()
+    return render(request, "network/profile.html",{
+        "owner": owner,
+        "number_of_followers": number_of_followers
+    })
+
+def follower(request):
+    owner = request.user
+    followers = Follower.objects.get(being_followered=owner)
+    return JsonResponse([follower.serialize_follow() for follower in followers], safe=False)
 
 def login_view(request):
     if request.method == "POST":
