@@ -42,19 +42,37 @@ def all_post(request):
     return JsonResponse([post.serialize_post() for post in posts], safe=False)
 
 def profile(request):
-    owner = request.user
-    followers = Follower.objects.get(being_followered=owner)
-    #being_followered = Follower.objects.filter(owner in followers)
-    number_of_followers = followers.followers.count()
+    
+    # Current user as owner
+    current_user = request.user
+    
+    # Find the number of followers of the owner 
+    being_followered = Follower.objects.filter(being_followered=current_user)
+    number_of_followers = being_followered.count()
+
+    #Find the number and the list of following user by the owner
+    number_following = 0
+    followers = Follower.objects.filter(followers=current_user)
+    number_following = followers.count()
+    list_following_of_owner = []
+    for follower in followers:
+        list_following_of_owner.append(follower.being_followered.username)
+    
+
     return render(request, "network/profile.html",{
-        "owner": owner,
-        "number_of_followers": number_of_followers
+        "owner": current_user,
+        "list_following_of_owner": list_following_of_owner,
+        "number_of_followers": number_of_followers,
+        "number_of_following": number_following
     })
 
 def follower(request):
+
+    # Return JSON form of follower relationship 
     owner = request.user
-    followers = Follower.objects.get(being_followered=owner)
+    followers = Follower.objects.filter(being_followered=owner)
     return JsonResponse([follower.serialize_follow() for follower in followers], safe=False)
+
 
 def login_view(request):
     if request.method == "POST":

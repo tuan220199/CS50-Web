@@ -40,16 +40,17 @@ class Comment(models.Model):
         return f"{self.user_comment} comments {self.comment} on {self.post}"
 
 class Follower(models.Model):
-    followers = models.ManyToManyField(User, blank=True, null=True, related_name="followers")
+    followers = models.ForeignKey(User, blank=True, null=True, related_name="followers", on_delete = models.CASCADE)
     being_followered = models.ForeignKey(User, on_delete = models.CASCADE, blank=True, null=True, related_name="being_followered") 
 
     def serialize_follow(self):
+        
         return {
             "id": self.id,
-            "follower": [user.username for user in self.followers.all()],
+            "follower": self.followers.username,
             "being_followered": self.being_followered.username,
         }
 
     def __str__(self):
-        return f"{self.being_followered} has {self.followers.count()} followers"
+        return f"{self.being_followered} has {self.followers} followers"
     
