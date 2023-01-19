@@ -58,20 +58,67 @@ def profile(request):
     for follower in followers:
         list_following_of_owner.append(follower.being_followered.username)
     
+    # Retrieve all posts 
+    posts = Post.objects.all()
 
     return render(request, "network/profile.html",{
         "owner": current_user,
+        "posts": posts,
         "list_following_of_owner": list_following_of_owner,
         "number_of_followers": number_of_followers,
         "number_of_following": number_following
     })
 
-def follower(request):
+def unfollow(request):
+    if request.method == "POST":
+
+        # Access the owner of the post to unfollow by the current user 
+        owner_post_username = request.POST["owner_post_username"] 
+        owner_post = User.objects.get(username=owner_post_username)
+        
+        # Access the current user
+        current_user_username = request.POST["current_user"]
+        current_user = User.objects.get(username=current_user_username)
+        
+        # Find the relationhsip follower in database to remove
+        follower_relationship = Follower.objects.get(being_followered=owner_post, followers=current_user)
+        follower_relationship.delete()
+
+        return HttpResponseRedirect(reverse("profile"))
+
+def follow(request):
+    if request.method == "POST":
+
+         # Access the owner of the post to follow by the current user
+        owner_post_username = request.POST["owner_post_username"] 
+        owner_post = User.objects.get(username=owner_post_username)
+        
+        # Access the current user
+        current_user_username = request.POST["current_user"]
+        current_user = User.objects.get(username=current_user_username)
+        
+        # Create new relationhsip follower in database
+        new_follower_relationship = Follower(being_followered=owner_post, followers=current_user)
+        new_follower_relationship.save()
+
+        return HttpResponseRedirect(reverse("profile"))
+
+
+def follower(request, being_followered_username):
 
     # Return JSON form of follower relationship 
     owner = request.user
-    followers = Follower.objects.filter(being_followered=owner)
-    return JsonResponse([follower.serialize_follow() for follower in followers], safe=False)
+    try:
+        being_followered = User.objects.get(username=being_followered_username) 
+    except:
+        return JsonResponse({"error":"user not found"})
+
+    try: 
+        follow_relation = Follower.objects.get(followers=owner, being_followered=being_followered)
+    except:
+        return JsonResponse({"error":"follower not found"})
+    
+    return JsonResponse(follow_relation.serialize_follow(), safe=False)
 
 
 def login_view(request):
