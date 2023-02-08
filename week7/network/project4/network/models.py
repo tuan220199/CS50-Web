@@ -11,6 +11,9 @@ class Post(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, blank=True, null=True, related_name="user_like")
 
+    def likes_count(self):
+        return self.likes.count()
+
     def serialize_post(self):
         return {
             "id": self.id,

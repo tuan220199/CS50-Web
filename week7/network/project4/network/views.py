@@ -6,12 +6,28 @@ from django.http import JsonResponse
 from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.core.paginator import Paginator
 from .models import User, Post, Comment, Follower
 
 
 def index(request):
-    return render(request, "network/index.html")
+    # Current user as owner
+    current_user = request.user
+    
+    # Retrieve all posts 
+    posts = Post.objects.all().order_by("id").reverse()
+
+    #Pagination 
+    paginator = Paginator(posts, 3) # Show 10 posts per page.
+
+    page_number = request.GET.get('page')
+    posts_of_the_page = paginator.get_page(page_number)
+    
+
+    return render(request, "network/index.html",{
+        "owner": current_user,
+        "posts_of_the_page": posts_of_the_page
+    })
 
 
 def posting(request):
@@ -35,35 +51,36 @@ def posting(request):
 
         return HttpResponseRedirect(reverse("index"))
 
-def all_post(request):
-
-    # Return all the posts of all users in reverse order in JSON form 
-    posts = Post.objects.all().order_by("-timestamp")
-    return JsonResponse([post.serialize_post() for post in posts], safe=False)
-
-def profile(request):
+def profile(request, user_id):
     
     # Current user as owner
-    current_user = request.user
+    profile_user = User.objects.get(id=user_id)
     
     # Find the number of followers of the owner 
-    being_followered = Follower.objects.filter(being_followered=current_user)
+    being_followered = Follower.objects.filter(being_followered=profile_user)
     number_of_followers = being_followered.count()
 
     #Find the number and the list of following user by the owner
     number_following = 0
-    followers = Follower.objects.filter(followers=current_user)
+    followers = Follower.objects.filter(followers=profile_user)
     number_following = followers.count()
     list_following_of_owner = []
     for follower in followers:
         list_following_of_owner.append(follower.being_followered.username)
     
     # Retrieve all posts 
-    posts = Post.objects.all()
+    posts = Post.objects.filter(owner=profile_user).order_by("id").reverse()
+
+    #Pagination 
+    paginator = Paginator(posts, 1) # Show 10 posts per page.
+
+    page_number = request.GET.get('page')
+    posts_of_the_page = paginator.get_page(page_number)
 
     return render(request, "network/profile.html",{
-        "owner": current_user,
+        "user":profile_user,
         "posts": posts,
+        "posts_of_the_page": posts_of_the_page,
         "list_following_of_owner": list_following_of_owner,
         "number_of_followers": number_of_followers,
         "number_of_following": number_following
@@ -104,22 +121,31 @@ def follow(request):
         return HttpResponseRedirect(reverse("profile"))
 
 
-def follower(request, being_followered_username):
-
-    # Return JSON form of follower relationship 
-    owner = request.user
-    try:
-        being_followered = User.objects.get(username=being_followered_username) 
-    except:
-        return JsonResponse({"error":"user not found"})
-
-    try: 
-        follow_relation = Follower.objects.get(followers=owner, being_followered=being_followered)
-    except:
-        return JsonResponse({"error":"follower not found"})
+def following(request):
     
-    return JsonResponse(follow_relation.serialize_follow(), safe=False)
+    # current user 
+    current_user = request.user
 
+    # All the following user by user
+    follower_relationships = Follower.objects.filter(followers=current_user)
+    list_following_of_owner = []
+    for follower in follower_relationships:
+        list_following_of_owner.append(follower.being_followered.username)
+    
+    # Retrieve all posts 
+    posts = Post.objects.all().order_by("id").reverse()
+
+    #Pagination 
+    paginator = Paginator(posts, 2) # Show 10 posts per page.
+
+    page_number = request.GET.get('page')
+    posts_of_the_page = paginator.get_page(page_number)
+
+    return render(request, "network/following.html", {
+        "posts": posts,
+        "posts_of_the_page": posts_of_the_page,
+        "list_following_of_owner": list_following_of_owner
+    })
 
 def login_view(request):
     if request.method == "POST":

@@ -1,66 +1,65 @@
-
+{% extends "network/layout.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>{% block title %}Social Network{% endblock %}</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
-        <script src="{% static 'network/index.js' %}"></script>
-    </head>
-    <body>
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Network</a>
-          
-            <div>
-              <ul class="navbar-nav mr-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'profile' %}"><strong>{{ user.username }}</strong></a>
-                    </li>
-                {% endif %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'index' %}">All Posts</a>
-                </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Following</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
-                {% endif %}
-              </ul>
-            </div>
-          </nav>
-        
-        <div class="body">
+{% block body %}
             {% if user.is_authenticated %}
-    <div id="new_post_form">
-        <form action="{% url 'posting' %}" id="post_form" method="Post">
-            {% csrf_token %}
-            <div>
-                <label for="new_post"><strong>{{request.user.username}}</strong></label>
-                <textarea class="form-control" placeholder="What do you think?" id="post_content" rows="5" name="post_content"></textarea>
+            <div id="new_post_form">
+                <form action="{% url 'posting' %}" id="post_form" method="Post">
+                    {% csrf_token %}
+                    <div>
+                        <label for="new_post"><strong>{{request.user.username}}</strong></label>
+                        <textarea class="form-control" placeholder="What do you think?" id="post_content" rows="5" name="post_content"></textarea>
+                    </div>
+                    <input type="submit" id="post_button" value="Post" class="btn btn-primary">
+                </form>
             </div>
-            <input type="submit" id="post_button" value="Post" class="btn btn-primary">
-        </form>
-    </div>
-    {%  endif %}
-    
-    <div id="all_posts">
-        
-    </div>
+            {%  endif %}
 
-    </body>
-</html>
+    {% for post in posts_of_the_page %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"><a href="{% url 'profile' post.owner.id %}">@{{post.owner.username}}</a></h5>
+
+            {% if post.owner.username in list_following_of_owner %}
+            <form action="{% url 'unfollow'%}" method="post">
+                {% csrf_token %}
+                <input type="hidden" value="{{post.owner.username}}" name="owner_post_username">
+                <input type="hidden" value="{{owner.username}}" name="current_user">
+                <input class="btn btn-primary" type="submit" value="Unfollow">
+            </form>
+
+            {% else %}
+            <form action="{% url 'follow'%}"method="post">
+                {% csrf_token %}
+                <input type="hidden" value="{{post.owner.username}}" name="owner_post_username">
+                <input type="hidden" value="{{owner.username}}" name="current_user">
+                <input class="btn btn-primary" type="submit" value="Follow">
+            </form>
+            {% endif%}
+            
+            </h5>
+            <p class="card-text">{{post.content}}</p>
+            <p class="card-text">{{post.timestamp}} </p>
+            <p class="card-text">{{post.likes_count}} likes</p>
+            
+        </div>
+    </div>
+    {% endfor %}
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {% if posts_of_the_page.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.previous_page_number }}">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.previous_page_number }}">{{ posts_of_the_page.previous_page_number }}</a></li>
+            {% endif %}
+            
+            <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page }}">{{ posts_of_the_page.number }}</a></li>
+            
+            {% if posts_of_the_page.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.next_page_number}}">{{ posts_of_the_page.next_page_number}}</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.next_page_number}}">Next</a></li>
+            {% endif %}
+        </ul>
+      </nav>
+{% endblock %} 
 
