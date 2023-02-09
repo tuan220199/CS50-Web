@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.shortcuts import HttpResponse, HttpResponseRedirect, render
+from django.shortcuts import HttpResponse, HttpResponseRedirect, render, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
@@ -13,6 +13,13 @@ from .models import User, Post, Comment, Follower
 def index(request):
     # Current user as owner
     current_user = request.user
+
+    #Find the number and the list of following user by the owner
+    followers = Follower.objects.filter(followers=current_user)
+    list_following_of_owner = []
+    for follower in followers:
+        list_following_of_owner.append(follower.being_followered.username)
+    
     
     # Retrieve all posts 
     posts = Post.objects.all().order_by("id").reverse()
@@ -26,6 +33,7 @@ def index(request):
 
     return render(request, "network/index.html",{
         "owner": current_user,
+        "list_following_of_owner": list_following_of_owner,
         "posts_of_the_page": posts_of_the_page
     })
 
@@ -101,7 +109,8 @@ def unfollow(request):
         follower_relationship = Follower.objects.get(being_followered=owner_post, followers=current_user)
         follower_relationship.delete()
 
-        return HttpResponseRedirect(reverse("profile"))
+        #return HttpResponseRedirect(reverse("profile"))
+        return redirect("profile", user_id=current_user.id)
 
 def follow(request):
     if request.method == "POST":
@@ -118,7 +127,8 @@ def follow(request):
         new_follower_relationship = Follower(being_followered=owner_post, followers=current_user)
         new_follower_relationship.save()
 
-        return HttpResponseRedirect(reverse("profile"))
+        #return HttpResponseRedirect(reverse("profile"))
+        return redirect("profile", user_id=current_user.id)
 
 
 def following(request):
@@ -130,20 +140,22 @@ def following(request):
     follower_relationships = Follower.objects.filter(followers=current_user)
     list_following_of_owner = []
     for follower in follower_relationships:
-        list_following_of_owner.append(follower.being_followered.username)
+        list_following_of_owner.append(follower.being_followered)
     
     # Retrieve all posts 
-    posts = Post.objects.all().order_by("id").reverse()
+    posts = Post.objects.filter(owner__in=list_following_of_owner).order_by("id").reverse()
+
+    #posts = Post.objects.all().order_by("id").reverse()
 
     #Pagination 
-    paginator = Paginator(posts, 2) # Show 10 posts per page.
+    paginator = Paginator(posts, 4) # Show 10 posts per page.
 
     page_number = request.GET.get('page')
     posts_of_the_page = paginator.get_page(page_number)
 
     return render(request, "network/following.html", {
-        "posts": posts,
         "posts_of_the_page": posts_of_the_page,
+        "current_user": current_user,
         "list_following_of_owner": list_following_of_owner
     })
 

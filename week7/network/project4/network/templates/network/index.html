@@ -28,13 +28,13 @@
                 <input class="btn btn-primary" type="submit" value="Unfollow">
             </form>
 
-            {% else %}
-            <form action="{% url 'follow'%}"method="post">
-                {% csrf_token %}
-                <input type="hidden" value="{{post.owner.username}}" name="owner_post_username">
-                <input type="hidden" value="{{owner.username}}" name="current_user">
-                <input class="btn btn-primary" type="submit" value="Follow">
-            </form>
+            {% elif post.owner.username not in list_following_of_owner and post.owner.username != owner.username %} 
+                <form action="{% url 'follow'%}"method="post">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{post.owner.username}}" name="owner_post_username">
+                    <input type="hidden" value="{{owner.username}}" name="current_user">
+                    <input class="btn btn-primary" type="submit" value="Follow">
+                </form>
             {% endif%}
             
             </h5>
