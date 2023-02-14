@@ -41,8 +41,14 @@ def like(request, post_id):
     if request.method == "POST":
         data = json.loads(request.body)
         post_id = data["post_of_id"]
+        post = Post.objects.get(pk=post_id)
+
+        current_user = request.user
+
+        post.likes.add(current_user)
+        post.save()
         
-        return JsonResponse({"message": "Change successful", "data": post_id})
+        return JsonResponse({"message": "Change successful", "id of post": post_id, "id of current user": current_user.id})
 
 
 def edit(request, post_id):

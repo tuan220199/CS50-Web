@@ -50,9 +50,15 @@
             });
         }
 
-        function like_submit_handler(post_id)
+        function like_submit_handler(post_id, post_likes_count)
         {
+            
+            post_likes_count += 1;
+            document.querySelector("#number_of_likes").innerHTML = post_likes_count;
+
             console.log(post_id);
+            console.log(post_likes_count);
+
             //console.log(current_user_id);
             fetch(`/like/${post_id}`, {
                 method: "POST",
@@ -109,10 +115,10 @@
             
             <p class="card-text" id="content_{{post.id}}">{{post.content}}</p>
             <p class="card-text">{{post.timestamp}} </p>
-            <p class="card-text">{{post.likes_count}} likes</p>
+            <p class="card-text" id="number_of_likes">{{post.likes_count}} likes</p>
             
             <i class="fas fa-thumbs-up"></i>
-            <button id="like_button" class="btn btn-primary" onclick="like_submit_handler({{post.id}})">Like</button>
+            <button id="like_button" class="btn btn-primary" onclick="like_submit_handler({{post.id}}, {{post.likes_count}})">Like</button>
             
 
             {% if user.is_authenticated %}
