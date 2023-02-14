@@ -37,6 +37,31 @@ def index(request):
         "posts_of_the_page": posts_of_the_page
     })
 
+def like(request, post_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        post_id = data["post_of_id"]
+        
+        return JsonResponse({"message": "Change successful", "data": post_id})
+
+
+def edit(request, post_id):
+    """
+    If the request method is POST, then we get the post with the given post_id, change its content to
+    the content in the request body, and save it
+    
+    :param request: The request object is a Python object that contains all the information about the
+    request that was sent to the server
+    :param post_id: The id of the post to be edited
+    :return: a JsonResponse object.
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        edit_post = Post.objects.get(pk=post_id)
+        edit_post.content = data["content"]
+        edit_post.save()
+        
+        return JsonResponse({"message": "Change successful", "data": data["content"]})
 
 def posting(request):
     

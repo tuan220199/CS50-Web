@@ -2,6 +2,74 @@
 {% load static %}
 
 {% block body %}
+
+    <script>
+
+        // Load all the document then execute the on_click of button (save changes) in edit feature
+        document.addEventListener("DOMContentLoaded", function(){
+            document.querySelector("#button_save_the_editted_post").addEventListener("click", () => submit_handler(post_id));
+        });
+
+        // Define the Cookie for the submit_handler
+        function getCookie(name){
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length ==2) return parts.pop().split(';').shift();
+        }
+
+        // Retrieve the new content in textarea, then by the id of the post, post it to the fetch API
+        // Then backend can save it into the database 
+        function submit_handler(post_id)
+        {
+            const textareaValue = document.querySelector(`#textarea_${post_id}`).value;
+            const content = document.querySelector(`#content_${post_id}`);
+            const modal = document.querySelector(`#edit_post_modal_${post_id}`);
+            console.log(textareaValue);
+
+            fetch(`/edit/${post_id}`, {
+                method: "POST",
+                headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+                body: JSON.stringify({
+                    content: textareaValue
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                content.innerHTML = result.data;
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                modal.setAttribute('style', 'display: none');
+
+                // get modal backdrops
+                const modalsBackdrops = document.getElementsByClassName('modal-backdrop');
+
+                // remove every modal backdrop
+                for(let i=0; i<modalsBackdrops.length; i++) {
+                    document.body.removeChild(modalsBackdrops[i]);
+                }
+            });
+        }
+
+        function like_submit_handler(post_id)
+        {
+            console.log(post_id);
+            //console.log(current_user_id);
+            fetch(`/like/${post_id}`, {
+                method: "POST",
+                headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+                body: JSON.stringify({
+                    post_of_id: post_id
+                    //current_user_id: current_user_id     
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+            });
+        }
+
+    </script>
+
             {% if user.is_authenticated %}
             <div id="new_post_form">
                 <form action="{% url 'posting' %}" id="post_form" method="Post">
@@ -35,13 +103,53 @@
                     <input type="hidden" value="{{owner.username}}" name="current_user">
                     <input class="btn btn-primary" type="submit" value="Follow">
                 </form>
-            {% endif%}
+            {% endif %}
             
             </h5>
-            <p class="card-text">{{post.content}}</p>
+            
+            <p class="card-text" id="content_{{post.id}}">{{post.content}}</p>
             <p class="card-text">{{post.timestamp}} </p>
             <p class="card-text">{{post.likes_count}} likes</p>
             
+            <i class="fas fa-thumbs-up"></i>
+            <button id="like_button" class="btn btn-primary" onclick="like_submit_handler({{post.id}})">Like</button>
+            
+
+            {% if user.is_authenticated %}
+                {% if user == post.owner %}
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_post_modal_{{post.id}}" >Edit</button>
+                    </div>
+                    <div class="modal fade" tabindex="-1" id="edit_post_modal_{{post.id}}" aria-labelledby="edit_post_modal_{{post.id}}_label" araia-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Edit Post</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <textarea name="content" id="textarea_{{post.id}}" cols="30" rows="10" class="form-control">{{post.content}}</textarea>
+                            </div>
+                            <div class="modal-footer">
+
+                                <!--This script has function: define the variable post_id-->
+                                <!--Then it can be passed in the java script through function, directly, ...-->
+                                <script>
+                                    var post_id = "{{ post.id }}";
+                                    //var current_user_id = "{{ owner.id }}";                      
+                                </script>
+
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-primary" id="button_save_the_editted_post"  >Save changes</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                {% endif %}
+            {% endif %}
+
         </div>
     </div>
     {% endfor %}
@@ -63,3 +171,6 @@
       </nav>
 {% endblock %} 
 
+{% block script %}
+    <script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
