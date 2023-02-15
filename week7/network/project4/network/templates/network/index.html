@@ -18,14 +18,18 @@
         }
 
         // Retrieve the new content in textarea, then by the id of the post, post it to the fetch API
-        // Then backend can save it into the database 
         function submit_handler(post_id)
         {
+            // Retrieve the values from the text area (editted content) 
             const textareaValue = document.querySelector(`#textarea_${post_id}`).value;
+            
+            // Access to the elemnt of html 
             const content = document.querySelector(`#content_${post_id}`);
             const modal = document.querySelector(`#edit_post_modal_${post_id}`);
             console.log(textareaValue);
 
+            // Pass the id of the post which is edited by current user (owner of the post) in JSON format
+            // Then backend can save it into the database 
             fetch(`/edit/${post_id}`, {
                 method: "POST",
                 headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
@@ -35,7 +39,11 @@
             })
             .then(response => response.json())
             .then(result => {
+                
+                // Then update the new content in the content element in HTML 
                 content.innerHTML = result.data;
+
+                // Remove the modal after save changes
                 modal.classList.remove('show');
                 modal.setAttribute('aria-hidden', 'true');
                 modal.setAttribute('style', 'display: none');
@@ -50,27 +58,55 @@
             });
         }
 
+        // Like function when the like buttion is on click event
         function like_submit_handler(post_id, post_likes_count)
         {
-            
-            post_likes_count += 1;
-            document.querySelector("#number_of_likes").innerHTML = post_likes_count;
+            var likes_number = parseInt(post_likes_count);
+            likes_number += 1;
 
-            console.log(post_id);
-            console.log(post_likes_count);
-
-            //console.log(current_user_id);
+            // fetch API when send the data from the Java Script to Python (viewer)
+            // Pass the id of the post which is liked by current user in JSON format
+            // Then backend can save it into the database 
             fetch(`/like/${post_id}`, {
                 method: "POST",
                 headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
                 body: JSON.stringify({
-                    post_of_id: post_id
-                    //current_user_id: current_user_id     
+                    post_of_id: post_id,
+                    likes_count: likes_number    
                 })
             })
             .then(response => response.json())
             .then(result => {
+                // Then update teh client side the number of likes
+                document.querySelector("#number_of_likes").innerHTML = `${likes_number} likes`;
                 console.log(result);
+                window.location.reload();
+            });
+        }
+
+        // Unlike function when the like buttion is on click event
+        function unlike_submit_handler(post_id, post_likes_count)
+        {
+            var likes_number = parseInt(post_likes_count);
+            likes_number -= 1;
+
+            // fetch API when send the data from the Java Script to Python (viewer)
+            // Pass the id of the post which is liked by current user in JSON format
+            // Then backend can save it into the database 
+            fetch(`/unlike/${post_id}`, {
+                method: "POST",
+                headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+                body: JSON.stringify({
+                    post_of_id: post_id,
+                    likes_count: likes_number    
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Then update teh client side the number of likes
+                document.querySelector("#number_of_likes").innerHTML = `${likes_number} likes`;
+                console.log(result);
+                window.location.reload();
             });
         }
 
@@ -117,10 +153,6 @@
             <p class="card-text">{{post.timestamp}} </p>
             <p class="card-text" id="number_of_likes">{{post.likes_count}} likes</p>
             
-            <i class="fas fa-thumbs-up"></i>
-            <button id="like_button" class="btn btn-primary" onclick="like_submit_handler({{post.id}}, {{post.likes_count}})">Like</button>
-            
-
             {% if user.is_authenticated %}
                 {% if user == post.owner %}
                     <div>
@@ -153,6 +185,12 @@
                           </div>
                         </div>
                       </div>
+                {% else %}
+                    {% if post.id not in list_posts_current_user_liked %}
+                        <button id="like_button" class="btn btn-primary" onclick="like_submit_handler({{post.id}}, {{post.likes_count}})"><i class="fas fa-thumbs-up"></i></button>
+                    {% else %}
+                        <button id="unlike_button" class="btn btn-primary" onclick="unlike_submit_handler({{post.id}}, {{post.likes_count}})"><i class="fas fa-thumbs-down"></i></button>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 

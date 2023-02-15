@@ -24,6 +24,12 @@ def index(request):
     # Retrieve all posts 
     posts = Post.objects.all().order_by("id").reverse()
 
+    # Check all the posts that the current user has liked
+    list_posts_current_user_liked = [] 
+    for post in posts:
+        if post.likes.filter(id=current_user.id).exists():
+            list_posts_current_user_liked.append(post.id)
+
     #Pagination 
     paginator = Paginator(posts, 3) # Show 10 posts per page.
 
@@ -33,6 +39,7 @@ def index(request):
 
     return render(request, "network/index.html",{
         "owner": current_user,
+        "list_posts_current_user_liked": list_posts_current_user_liked,
         "list_following_of_owner": list_following_of_owner,
         "posts_of_the_page": posts_of_the_page
     })
@@ -41,6 +48,8 @@ def like(request, post_id):
     if request.method == "POST":
         data = json.loads(request.body)
         post_id = data["post_of_id"]
+        likes_count = data["likes_count"]
+
         post = Post.objects.get(pk=post_id)
 
         current_user = request.user
@@ -48,7 +57,22 @@ def like(request, post_id):
         post.likes.add(current_user)
         post.save()
         
-        return JsonResponse({"message": "Change successful", "id of post": post_id, "id of current user": current_user.id})
+        return JsonResponse({"message": "Change successful", "id of post": post_id, "id of current user": current_user.id, "likes_count": likes_count})
+
+def unlike(request, post_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        post_id = data["post_of_id"]
+        likes_count = data["likes_count"]
+
+        post = Post.objects.get(pk=post_id)
+
+        current_user = request.user
+
+        post.likes.remove(current_user)
+        post.save()
+        
+        return JsonResponse({"message": "Change successful", "id of post": post_id, "id of current user": current_user.id, "likes_count": likes_count})
 
 
 def edit(request, post_id):
