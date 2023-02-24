@@ -201,6 +201,11 @@ def following(request):
     posts = Post.objects.filter(owner__in=list_following_of_owner).order_by("id").reverse()
 
     #posts = Post.objects.all().order_by("id").reverse()
+    # Check all the posts that the current user has liked
+    list_posts_current_user_liked = [] 
+    for post in posts:
+        if post.likes.filter(id=current_user.id).exists():
+            list_posts_current_user_liked.append(post.id)
 
     #Pagination 
     paginator = Paginator(posts, 4) # Show 10 posts per page.
@@ -210,6 +215,7 @@ def following(request):
 
     return render(request, "network/following.html", {
         "posts_of_the_page": posts_of_the_page,
+        "list_posts_current_user_liked": list_posts_current_user_liked,
         "current_user": current_user,
         "list_following_of_owner": list_following_of_owner
     })
