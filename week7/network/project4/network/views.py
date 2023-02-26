@@ -2,8 +2,8 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import JsonResponse
-from django.shortcuts import HttpResponse, HttpResponseRedirect, render, redirect
+from django.http import JsonResponse, HttpResponseForbidden
+from django.shortcuts import HttpResponse, HttpResponseRedirect, render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
@@ -74,7 +74,7 @@ def unlike(request, post_id):
         
         return JsonResponse({"message": "Change successful", "id of post": post_id, "id of current user": current_user.id, "likes_count": likes_count})
 
-
+@login_required
 def edit(request, post_id):
     """
     If the request method is POST, then we get the post with the given post_id, change its content to
@@ -85,13 +85,26 @@ def edit(request, post_id):
     :param post_id: The id of the post to be edited
     :return: a JsonResponse object.
     """
+
+    #if request.method == "POST":
+    #    data = json.loads(request.body)
+    #    edit_post = Post.objects.get(pk=post_id)
+    #    edit_post.content = data["content"]
+    #    edit_post.save()
+        
+    #    return JsonResponse({"message": "Change successful", "data": data["content"]})
+
+    post = Post.objects.get(pk=post_id)
+    if post.owner != request.user:
+        return HttpResponseForbidden()
     if request.method == "POST":
         data = json.loads(request.body)
         edit_post = Post.objects.get(pk=post_id)
         edit_post.content = data["content"]
         edit_post.save()
-        
+
         return JsonResponse({"message": "Change successful", "data": data["content"]})
+    
 
 def posting(request):
     
@@ -114,6 +127,7 @@ def posting(request):
 
         return HttpResponseRedirect(reverse("index"))
 
+@login_required
 def profile(request, user_id):
     
     # Current user as owner
