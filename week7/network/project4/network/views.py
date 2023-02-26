@@ -131,6 +131,9 @@ def posting(request):
 def profile(request, user_id):
     
     # Current user as owner
+    current_user = request.user
+
+    #User of the profile 
     profile_user = User.objects.get(id=user_id)
     
     # Find the number of followers of the owner 
@@ -157,6 +160,7 @@ def profile(request, user_id):
     return render(request, "network/profile.html",{
         "user":profile_user,
         "posts": posts,
+        'editable': profile_user == current_user,
         "posts_of_the_page": posts_of_the_page,
         "list_following_of_owner": list_following_of_owner,
         "number_of_followers": number_of_followers,
